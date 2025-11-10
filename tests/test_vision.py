@@ -1,6 +1,6 @@
 import asyncio
 # import os
-from vision_processor import VisionProcessor
+from foodfacts.vision_processor import VisionProcessor
 
 
 async def test_vision():

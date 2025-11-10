@@ -1,5 +1,4 @@
-from vision_processor import VisionProcessor
-from database import db
+from foodfacts.vision_processor import VisionProcessor
 
 
 class NutritionCalculator:
@@ -7,8 +6,12 @@ class NutritionCalculator:
         self.vision_processor = VisionProcessor()
 
     async def process_image(self, image_path):
-        """Основной метод обработки изображения"""
-
+        """
+        Основной метод обработки изображения:
+        - анализ изображения
+        - получение БЖУ для каждого продукта
+        - суммирование общих показателей
+        """
         try:
             # 1. Анализируем изображение
             products = await self.vision_processor.analyze_food_image(image_path)
@@ -21,7 +24,7 @@ class NutritionCalculator:
             for product in products:
                 print(f"Обрабатываем продукт: {product}")  # Для отладки
 
-                nutrition = await self.get_product_nutrition(
+                nutrition = await self.vision_processor.get_nutrition_info(
                     product['name'],
                     product['estimated_weight_g'],
                     product.get('cooking_method', 'не указано')
@@ -49,33 +52,10 @@ class NutritionCalculator:
             print(f"Ошибка в process_image: {e}")  # Для отладки
             raise
 
-    async def get_product_nutrition(self, product_name, weight, cooking_method):
-        """Получает БЖУ для продукта, используя кэш если возможно"""
-
-        # Проверяем кэш
-        product_hash = self.vision_processor.create_product_hash(
-            product_name, weight, cooking_method
-        )
-
-        cached_data = db.get_cached_product(product_hash)
-        if cached_data:
-            print(f"Используем кэш для: {product_name}")  # Для отладки
-            return cached_data
-
-        # Если нет в кэше, запрашиваем у AI
-        print(f"Запрашиваем данные для: {product_name}")  # Для отладки
-        nutrition_data = await self.vision_processor.get_nutrition_info(
-            product_name, weight, cooking_method
-        )
-
-        # Сохраняем в кэш
-        db.cache_product(product_hash, product_name, nutrition_data)
-
-        return nutrition_data
-
     def format_nutrition_response(self, analysis_result):
-        """Форматирует ответ для пользователя"""
-
+        """
+        Форматирует ответ для пользователя
+        """
         if not analysis_result['products']:
             return "❌ Не удалось определить продукты на фото. Попробуйте другое фото."
 

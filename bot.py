@@ -24,9 +24,9 @@ class NutritionBot:
 
         # Инициализируем компоненты
         try:
-            from database import db
-            from nutrition_calculator import NutritionCalculator
-            from diary_manager import DiaryManager
+            from db_database_structure import db
+            from userdiary.nutrition_calculator import NutritionCalculator
+            from userdiary.diary_manager import DiaryManager
 
             self.db = db
             self.nutrition_calculator = NutritionCalculator()
